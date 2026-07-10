@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>CloudCounselage Support Bot</title>
   <link rel="stylesheet" href="/static/styles.css"/>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -15,16 +15,10 @@
     <div class="logo-sub">Support Bot Platform</div>
   </div>
   <div class="nav-section">Main</div>
-  <div class="nav-item active" data-page="chat" onclick="navigate('chat')">
-    <span>💬</span> Web Chat
-  </div>
-  <div class="nav-item" data-page="dashboard" onclick="navigate('dashboard')">
-    <span>📊</span> Dashboard
-  </div>
+  <div class="nav-item active" data-page="chat" onclick="navigate('chat')"><span>💬</span> Web Chat</div>
+  <div class="nav-item" data-page="dashboard" onclick="navigate('dashboard')"><span>📊</span> Dashboard</div>
   <div class="nav-section">Admin</div>
-  <div class="nav-item" data-page="faqs" onclick="navigate('faqs')">
-    <span>📋</span> FAQ Manager
-  </div>
+  <div class="nav-item" data-page="faqs" onclick="navigate('faqs')"><span>📋</span> FAQ Manager</div>
 </nav>
 
 <div class="main">
@@ -35,80 +29,63 @@
     </div>
     <div class="status-badge"><div class="dot"></div> Bot Online</div>
   </div>
-
   <div class="content">
 
     <!-- CHAT PAGE -->
     <div class="page active" id="page-chat">
       <div class="chat-layout">
         <div class="chat-box">
-          <div class="chat-header">
+          <div class="chat-header" id="chat-header">
             <div class="chat-header-left">
-              <div class="bot-avatar">🤖</div>
+              <div class="bot-avatar" id="bot-avatar-emoji">🤖</div>
               <div>
-                <div class="bot-name">CC Support Bot</div>
-                <div class="bot-status">● Online · Always available</div>
+                <div class="bot-name" id="bot-name">CC Support Bot</div>
+                <div class="bot-status" id="bot-sub">● Online · Always available</div>
               </div>
             </div>
             <span class="platform-label" id="platform-label">🌐 Web Chat</span>
           </div>
-
           <div class="messages" id="messages">
             <div class="msg bot">
-              <div class="msg-bubble">👋 Hi! I'm the CloudCounselage Support Bot.<br><br>Ask me anything about the GPI internship — onboarding, certificates, deadlines, or general support!</div>
+              <div class="msg-bubble">👋 Hi! I'm the CloudCounselage Support Bot.<br><br>Ask me anything about the GPI internship — onboarding, certificates, deadlines, or general support. You can also use the 🎤 mic button to speak!</div>
               <div class="msg-meta"><span class="msg-time">Just now</span></div>
             </div>
           </div>
-
           <div class="typing-row" id="typing">
-            <div class="typing-dot"></div>
-            <div class="typing-dot"></div>
-            <div class="typing-dot"></div>
+            <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
             <span class="typing-label">Bot is typing...</span>
           </div>
-
           <div class="chat-input-area">
             <div class="chat-input-row">
+              <button class="voice-btn" id="voice-btn" onclick="toggleVoice()" title="Click to speak">🎤</button>
               <input class="chat-input" id="chat-input" placeholder="Type your question here..."/>
-              <button class="send-btn" onclick="sendMessage()">➤</button>
+              <button class="send-btn" id="send-btn" onclick="sendMessage()">➤</button>
             </div>
           </div>
         </div>
 
-        <!-- Right Panel -->
         <div class="info-panel">
           <div class="info-card">
             <h4>Session Info</h4>
-            <div class="stat-row">
-              <span class="stat-label">Session</span>
-              <span class="stat-val" id="session-display" style="font-size:11px;color:var(--muted)">—</span>
-            </div>
-            <div class="stat-row">
-              <span class="stat-label">Messages</span>
-              <span class="stat-val" id="msg-count">0</span>
-            </div>
-            <div class="stat-row">
-              <span class="stat-label">Channel</span>
-              <span class="stat-val" id="current-channel-val">🌐 Web Chat</span>
-            </div>
+            <div class="stat-row"><span class="stat-label">Session</span><span class="stat-val" id="session-display" style="font-size:11px;color:var(--muted)">—</span></div>
+            <div class="stat-row"><span class="stat-label">Messages</span><span class="stat-val" id="msg-count">0</span></div>
+            <div class="stat-row"><span class="stat-label">Channel</span><span class="stat-val" id="current-channel-val">🌐 Web Chat</span></div>
           </div>
-
           <div class="info-card">
             <h4>Switch Platform</h4>
             <div class="channel-chips">
-              <span class="ch-chip active" onclick="switchChannel('web', this)">🌐 Web</span>
-              <span class="ch-chip" onclick="switchChannel('telegram', this)">✈️ Telegram</span>
-              <span class="ch-chip" onclick="switchChannel('whatsapp', this)">📱 WhatsApp</span>
-              <span class="ch-chip" onclick="switchChannel('messenger', this)">💬 Messenger</span>
-              <span class="ch-chip" onclick="switchChannel('instagram', this)">📸 Instagram</span>
+              <span class="ch-chip active" onclick="switchChannel('web',this)">🌐 Web</span>
+              <span class="ch-chip" onclick="switchChannel('telegram',this)">✈️ Telegram</span>
+              <span class="ch-chip" onclick="switchChannel('whatsapp',this)">📱 WhatsApp</span>
+              <span class="ch-chip" onclick="switchChannel('messenger',this)">💬 Messenger</span>
+              <span class="ch-chip" onclick="switchChannel('instagram',this)">📸 Instagram</span>
             </div>
           </div>
-
           <div class="info-card">
             <h4>Quick Questions</h4>
             <div class="quick-btns">
               <button class="quick-btn" onclick="quickAsk('Is the internship paid?')">Is the internship paid?</button>
-              <button class="quick-btn" onclick="quickAsk('How do I join the internship?')">How do I join?</button>
+              <button class="quick-btn" onclick="quickAsk('How do I join?')">How do I join?</button>
               <button class="quick-btn" onclick="quickAsk('Will I get a certificate?')">Will I get a certificate?</button>
               <button class="quick-btn" onclick="quickAsk('How long is the internship?')">How long is it?</button>
               <button class="quick-btn" onclick="quickAsk('How do I contact support?')">Contact support</button>
@@ -118,22 +95,18 @@
       </div>
     </div>
 
-    <!-- DASHBOARD PAGE -->
+    <!-- DASHBOARD -->
     <div class="page" id="page-dashboard">
-      <div id="dashboard-content">
-        <div class="loading"><div class="spin"></div> Loading analytics...</div>
-      </div>
+      <div id="dashboard-content"><div class="loading"><div class="spin"></div> Loading analytics...</div></div>
     </div>
 
-    <!-- FAQ MANAGER PAGE -->
+    <!-- FAQ MANAGER -->
     <div class="page" id="page-faqs">
       <div class="faq-toolbar">
         <input class="search-input" id="faq-search" placeholder="Search FAQs..." oninput="searchFAQs()"/>
         <button class="btn btn-primary" onclick="openModal()">+ Add FAQ</button>
       </div>
-      <div id="faq-list">
-        <div class="loading"><div class="spin"></div> Loading FAQs...</div>
-      </div>
+      <div id="faq-list"><div class="loading"><div class="spin"></div> Loading FAQs...</div></div>
     </div>
 
   </div>
@@ -143,22 +116,10 @@
 <div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
   <div class="modal">
     <h3 id="modal-title">Add New FAQ</h3>
-    <div class="form-group">
-      <label class="form-label">Category</label>
-      <input class="form-input" id="faq-cat" placeholder="e.g. General, Internships, Certificates"/>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Question</label>
-      <input class="form-input" id="faq-q" placeholder="Enter the question..."/>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Answer</label>
-      <textarea class="form-textarea" id="faq-a" placeholder="Enter the answer..."></textarea>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Keywords (optional)</label>
-      <input class="form-input" id="faq-kw" placeholder="e.g. certificate, stipend, join"/>
-    </div>
+    <div class="form-group"><label class="form-label">Category</label><input class="form-input" id="faq-cat" placeholder="e.g. General, Internships"/></div>
+    <div class="form-group"><label class="form-label">Question</label><input class="form-input" id="faq-q" placeholder="Enter the question..."/></div>
+    <div class="form-group"><label class="form-label">Answer</label><textarea class="form-textarea" id="faq-a" placeholder="Enter the answer..."></textarea></div>
+    <div class="form-group"><label class="form-label">Keywords (optional)</label><input class="form-input" id="faq-kw" placeholder="e.g. certificate, join"/></div>
     <div class="modal-btns">
       <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
       <button class="btn btn-primary" onclick="saveFAQ()">Save FAQ</button>
@@ -167,7 +128,6 @@
 </div>
 
 <div class="toast" id="toast"></div>
-
 <script src="/static/app.js"></script>
 </body>
 </html>
