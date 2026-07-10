@@ -1,0 +1,22 @@
+[
+  {"question": "What is CloudCounselage?", "answer": "CloudCounselage is an IT and management consulting company with a social mission to help students and freshers become job-ready through free internship programs and training."},
+  {"question": "What is the Global Professional Internship GPI?", "answer": "The Global Professional Internship (GPI) is a structured, experience-based program where interns work on live projects under mentor guidance to build real-world skills."},
+  {"question": "Is the internship paid or free?", "answer": "The internship is 100% free and unpaid. There are no fees to join. Interns receive an Experience Certificate and mentor support."},
+  {"question": "How long is the internship duration?", "answer": "The internship runs for 6 weeks to 6 months, requiring around 120 hours of self-paced work. It is flexible and can be balanced with your college schedule."},
+  {"question": "How do I apply or join the internship?", "answer": "Register on the IAC portal, complete the preparation modules, then fill out the Live Project Onboarding / New Joinee Form. Your Appointment Letter will be sent by email after verification."},
+  {"question": "When will I get my appointment letter?", "answer": "Your Appointment Letter is issued within 5 to 7 business days after you submit the onboarding form and your documents are verified by the HR team."},
+  {"question": "Is the internship remote or work from home?", "answer": "Yes, all GPI internships are completely remote and work-from-home. You can work from anywhere as long as you meet the weekly milestones."},
+  {"question": "What domains are available for internship?", "answer": "CloudCounselage offers internships in 50+ domains including Python, Data Science, Web Development, AI/ML, Digital Marketing, HR, and Business Operations."},
+  {"question": "Will I get a certificate after internship?", "answer": "Yes. Interns who complete all tasks, submit deliverables, and pass evaluation receive an official Experience Certificate from CloudCounselage Pvt. Ltd."},
+  {"question": "Can I get a Letter of Recommendation LOR?", "answer": "Yes. Letters of Recommendation are awarded to top-performing interns who complete tasks early, add extra features, and actively help peers in the community groups."},
+  {"question": "What do I need to submit to complete the internship?", "answer": "You need to submit: 1) Your completed project code or files, 2) A project report covering tools and methodology, and 3) A short demo video of your project."},
+  {"question": "What happens if I miss the submission deadline?", "answer": "Request an extension in writing to your project manager before the deadline. Unauthorized late submissions may delay your certificate."},
+  {"question": "How do I contact support or help?", "answer": "For general queries email welcome@cloudcounselage.com. For HR or certificate issues email hr@cloudcounselage.com. For technical help, post in your domain Telegram or WhatsApp group."},
+  {"question": "How can my certificate be verified?", "answer": "Future employers can verify your certificate by emailing hr@cloudcounselage.com with your certificate ID."},
+  {"question": "Where is the CloudCounselage office located?", "answer": "CloudCounselage has offices in Mumbai. BKC office: 91 Springboard, Kagalwala House, BKC Kalina, Mumbai 400098. Vikhroli: 91 Springboard, Godrej & Boyce Estate, Vikhroli West, Mumbai 400079."},
+  {"question": "How do I communicate with my mentor?", "answer": "Communication is through official domain-specific WhatsApp and Telegram groups. Use these to ask questions, share updates, and get feedback from your mentor."},
+  {"question": "Do I need to attend weekly meetings?", "answer": "Yes. Interns must attend weekly virtual check-in meetings to review progress, address blockers, and confirm milestones are on track."},
+  {"question": "Is CloudCounselage genuine or a fraud?", "answer": "CloudCounselage is a legitimate company. All programs are completely free — we never ask for bank details or any payment. Always check that emails come from @cloudcounselage.com."},
+  {"question": "What is the IAC Industry Academia Community?", "answer": "The IAC is a free community platform run by CloudCounselage connecting students, colleges, and industry professionals for mentorship, training, and job opportunities."},
+  {"question": "How is the project evaluated?", "answer": "Your project is evaluated based on functionality, code quality, documentation, and your demo video by industry mentors and academic advisors."}
+]
