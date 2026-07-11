@@ -1,140 +1,150 @@
 import os
-import google.generativeai as genai
+import re
 from dotenv import load_dotenv
 
 load_dotenv()
 
-GEMINI_KEY = os.getenv("GEMINI_API_KEY", "").strip()
+# Try Gemini but don't depend on it
 model = None
-
-SYSTEM_PROMPT = """You are a helpful support assistant for CloudCounselage Pvt. Ltd., an Indian IT company that runs free internship programs for students.
-
-About CloudCounselage & GPI:
-- GPI = Global Professional Internship — free, unpaid, work from home, 120 hours, 6 weeks to 6 months
-- 50+ domains: Python, AI/ML, Data Science, Web Dev, Digital Marketing, HR, Finance etc
-- Students get Experience Certificate on completion, LOR for top performers
-- Onboarding: Register on IAC portal → complete modules → fill New Joinee Form → Appointment Letter in 5-7 days
-- Submit: code/project files + project report + demo video
-- Contact: welcome@cloudcounselage.com (general), hr@cloudcounselage.com (HR/certificates)
-- IAC community: 5 lakh+ members, 40+ countries
-- Office: Mumbai, BKC and Vikhroli
-
-Rules:
-- Answer any question a student asks, not just about internships
-- If someone says their name or asks casual questions, respond naturally and friendly
-- Keep answers to 2-3 sentences
-- Never say you don't know basic things
-- If truly unsure, say email welcome@cloudcounselage.com"""
-
-if GEMINI_KEY and GEMINI_KEY != "your_gemini_api_key_here":
-    try:
+try:
+    import google.generativeai as genai
+    GEMINI_KEY = os.getenv("GEMINI_API_KEY", "").strip()
+    if GEMINI_KEY and GEMINI_KEY != "your_gemini_api_key_here":
         genai.configure(api_key=GEMINI_KEY)
-        # gemini-2.0-flash is the latest free model
-        for model_name in ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-flash-latest", "gemini-pro"]:
+        for name in ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-pro"]:
             try:
-                model = genai.GenerativeModel(
-                    model_name=model_name,
-                    system_instruction=SYSTEM_PROMPT
-                )
-                # Quick test
-                test = model.generate_content("say ok")
-                if test and test.text:
-                    print(f"[AI] {model_name} ready.")
+                m = genai.GenerativeModel(name)
+                r = m.generate_content("say hi")
+                if r and r.text:
+                    model = m
+                    print(f"[AI] {name} ready.")
                     break
-            except Exception as e:
-                print(f"[AI] {model_name} failed: {e}")
-                model = None
+            except:
                 continue
-    except Exception as e:
-        print(f"[AI] Gemini init failed: {e}")
-        model = None
-else:
-    print("[AI] No Gemini key. Using keyword fallback.")
+except Exception as e:
+    print(f"[AI] Gemini unavailable: {e}")
+
+SYSTEM = """You are a helpful, friendly AI support assistant for CloudCounselage Pvt. Ltd.
+CloudCounselage runs the Global Professional Internship (GPI) — free internships for students.
+Key facts: free/unpaid, 120 hours, 6 weeks-6 months, remote, 50+ domains, certificate on completion.
+Respond naturally and helpfully in 2-3 sentences. For casual chat, be warm and conversational."""
 
 def get_ai_response(query: str) -> str:
+    # Try Gemini first
     if model:
         try:
-            response = model.generate_content(query)
-            if response and response.text and len(response.text.strip()) > 5:
-                return response.text.strip()
+            r = model.generate_content(f"{SYSTEM}\n\nUser: {query}\nAssistant:")
+            if r and r.text and len(r.text.strip()) > 10:
+                return r.text.strip()
         except Exception as e:
-            print(f"[AI] Gemini call error: {e}")
+            print(f"[AI] Gemini error: {e}")
 
-    # Smart keyword fallback
-    q = query.lower()
+    return smart_fallback(query)
 
-    # Greetings and casual
-    if any(w in q for w in ["hello", "hi ", "hey", "good morning", "good evening", "hii", "helo"]):
-        return "Hello! I'm the CloudCounselage Support Bot. Ask me anything about the GPI internship — onboarding, certificates, deadlines, domains, and more!"
 
-    if "name" in q and any(w in q for w in ["my", "i am", "i'm", "call me", "is"]):
-        name = query.strip().split()[-1] if query.strip() else "there"
-        return f"Nice to meet you! I'm the CloudCounselage Support Bot. How can I help you with the GPI internship today?"
+def smart_fallback(query: str) -> str:
+    q = query.lower().strip()
 
-    if any(w in q for w in ["who built", "who made", "who created", "who developed", "built this"]):
-        return "This platform was built by Hanshal Gajula as part of the CloudCounselage GPI internship project — an AI-powered multi-channel student support system."
+    # ── Casual / Small talk ───────────────────────────────────
+    if re.search(r'\b(hi|hello|hey|hii|helo|howdy|sup|wassup)\b', q):
+        return "Hey! 👋 I'm the CloudCounselage Support Bot. I'm here to help with anything about the GPI internship — onboarding, certificates, deadlines, domains, or general questions. What would you like to know?"
 
-    if any(w in q for w in ["what is this", "what are you", "what can you do", "tell me about"]):
-        return "I'm an AI support bot for CloudCounselage's GPI internship program. I can answer questions about joining, certificates, deadlines, domains, onboarding, and anything else about the internship!"
+    if re.search(r'\bhow are you\b', q):
+        return "I'm doing great, thanks for asking! 😊 I'm always ready to help. What can I do for you today?"
 
-    if any(w in q for w in ["how many", "number of", "programs", "types", "list", "available", "option", "which"]):
-        return "CloudCounselage offers internships in 50+ domains including Python, AI/ML, Data Science, Web Development, Digital Marketing, HR, Business Operations, Finance, and many more!"
+    if re.search(r'\bwho are you\b', q):
+        return "I'm the CloudCounselage AI Support Bot! I help students with questions about the GPI internship program — onboarding, certificates, project submissions, and more. Ask me anything!"
 
-    if any(w in q for w in ["duration", "long", "weeks", "months", "hours", "time", "period", "days", "how long"]):
-        return "The GPI internship runs for 6 weeks to 6 months and requires around 120 hours of self-paced work. It's fully flexible so you can balance it with college."
+    if re.search(r'\b(who built|who made|who created|who developed|built this|made this)\b', q):
+        return "This platform was built by Hanshal Gajula as part of the CloudCounselage GPI Internship project — a multi-channel AI-powered student support system."
 
-    if any(w in q for w in ["paid", "stipend", "salary", "money", "payment", "free", "cost", "fee", "charge"]):
-        return "The internship is 100% free and unpaid — no fees to join, no stipend. You get real project experience, mentor support, and an official Experience Certificate."
+    if re.search(r'\b(what is this|what are you|what can you do|your purpose|your role)\b', q):
+        return "I'm an AI support assistant for CloudCounselage's GPI internship program. I can answer your questions about joining, certificates, deadlines, domains, onboarding, and anything else related to the internship!"
 
-    if any(w in q for w in ["certificate", "experience letter", "completion", "credential"]):
-        return "Yes! You receive an official Experience Certificate from CloudCounselage after completing all tasks, submitting deliverables, and passing the evaluation."
+    if re.search(r'\b(thank|thanks|thank you|ty|thx|appreciate)\b', q):
+        return "You're welcome! 😊 Feel free to ask if you have more questions. Good luck with your internship journey!"
 
-    if any(w in q for w in ["lor", "recommendation", "letter of recommendation"]):
-        return "Letters of Recommendation are given to top-performing interns who finish tasks early, add advanced features, and actively support peers in community groups."
+    if re.search(r'\b(bye|goodbye|see you|take care|later|ciao)\b', q):
+        return "Goodbye! 👋 Best of luck with your internship. Come back anytime you have questions!"
 
-    if any(w in q for w in ["apply", "join", "register", "how to start", "onboard", "enroll", "get started", "begin"]):
-        return "To join: 1) Register on the IAC portal, 2) Complete the preparation modules, 3) Fill the New Joinee Form. Your Appointment Letter arrives by email in 5-7 business days."
+    if re.search(r'\bsorry\b', q):
+        return "No worries at all! How can I help you today?"
 
-    if any(w in q for w in ["appointment", "offer letter", "joining letter"]):
-        return "Your Appointment Letter is issued within 5-7 business days after the HR team verifies your submitted onboarding documents."
+    if re.search(r'\b(ok|okay|got it|understood|sure|alright|fine)\b', q):
+        return "Great! Let me know if there's anything else you'd like to know about the internship. I'm here to help!"
 
-    if any(w in q for w in ["domain", "field", "subject", "python", "data science", "web", "ai", "ml", "marketing", "hr", "finance"]):
-        return "CloudCounselage offers 50+ internship domains: Python, AI/ML, Data Science, Web Development, Digital Marketing, HR, Business Operations, Finance, and more!"
+    if re.search(r'(fuck|shit|damn|ass|stupid|idiot|hate|suck|crap)', q):
+        return "I understand the frustration! Let me know what's bothering you and I'll do my best to help you out. 😊"
 
-    if any(w in q for w in ["remote", "wfh", "work from home", "online", "location", "office", "where"]):
-        return "All GPI internships are 100% remote and work-from-home. Work from anywhere as long as you meet weekly milestones."
+    if re.search(r'\b(my name is|i am|i\'m|call me)\b', q):
+        words = q.split()
+        name = words[-1].capitalize() if words else "there"
+        return f"Nice to meet you, {name}! 😊 I'm the CloudCounselage Support Bot. How can I help you with the GPI internship today?"
 
-    if any(w in q for w in ["submit", "deliverable", "submission", "project report", "video", "what to submit"]):
-        return "Submit: 1) Your completed project code, 2) A project report covering tools and methodology, 3) A short demo video — all through the IAC portal."
+    # ── Internship Core ───────────────────────────────────────
+    if re.search(r'\b(what is gpi|what is the gpi|global professional|about gpi|about the internship|what is cloudcounselage|about cloud counselage)\b', q):
+        return "The Global Professional Internship (GPI) by CloudCounselage is a free, structured internship program where students work on live projects under mentor guidance. It's 120 hours, fully remote, and available in 50+ domains — with a certificate on completion!"
 
-    if any(w in q for w in ["deadline", "extension", "late", "miss", "delay", "last date"]):
-        return "If you need more time, request an extension in writing to your project manager before the deadline. Late submissions without approval may delay your certificate."
+    if re.search(r'\b(how many|number of|50\+|list of|available|which domain|what domain|all domain)\b', q) and re.search(r'\b(domain|program|field|course|internship|option)\b', q):
+        return "CloudCounselage offers internships in 50+ domains! Popular ones include Python Development, AI/ML, Data Science, Web Development, Digital Marketing, HR Management, Business Operations, Finance, Cloud Computing, and many more."
 
-    if any(w in q for w in ["contact", "email", "support", "reach", "help", "talk to"]):
-        return "General queries: welcome@cloudcounselage.com\nHR/certificates: hr@cloudcounselage.com\nTechnical help: post in your domain's Telegram or WhatsApp group."
+    if re.search(r'\b(duration|how long|weeks|months|120 hours|time period|period|days|deadline)\b', q) and not re.search(r'\b(submission|project|task)\b', q):
+        return "The GPI internship runs for 6 weeks to 6 months and requires around 120 hours of self-paced work. It's fully flexible — you can balance it easily with your college schedule!"
 
-    if any(w in q for w in ["meeting", "weekly", "check in", "review", "attendance", "webinar"]):
-        return "Yes, interns attend weekly virtual check-in meetings to review progress, solve blockers, and confirm milestones are on track."
+    if re.search(r'\b(paid|stipend|salary|money|payment|cost|fee|free|charge|unpaid)\b', q):
+        return "The GPI internship is completely free and unpaid — no registration fees, no hidden charges, no stipend. What you gain is real project experience, mentor support, and an official Experience Certificate from CloudCounselage!"
 
-    if any(w in q for w in ["mentor", "communicate", "whatsapp", "telegram", "group", "community", "peer"]):
-        return "Communication is through official domain-specific WhatsApp and Telegram groups. Use these to ask questions and get mentor feedback."
+    if re.search(r'\b(certificate|experience letter|completion letter|credential|certification)\b', q):
+        return "Yes! 🎉 All interns who complete their tasks, submit deliverables, and pass the evaluation receive an official Experience Certificate from CloudCounselage Pvt. Ltd. It's a great addition to your resume!"
 
-    if any(w in q for w in ["genuine", "real", "fraud", "scam", "legit", "fake", "trust", "safe", "verify"]):
-        return "CloudCounselage is a legitimate registered company. All programs are completely free — we never ask for payment. Trust only emails from @cloudcounselage.com."
+    if re.search(r'\b(lor|letter of recommendation|recommendation letter)\b', q):
+        return "Letters of Recommendation (LOR) are awarded to top-performing interns who complete tasks early, implement advanced features, and actively support their peers in the community groups. Aim high and you'll get one!"
 
-    if any(w in q for w in ["iac", "industry academia", "community", "about cloudcounselage", "what is cloud"]):
-        return "CloudCounselage is an IT company with a mission to make students job-ready. Their IAC (Industry Academia Community) has 5 lakh+ members across 40+ countries."
+    if re.search(r'\b(apply|how to join|how to apply|join|register|enroll|get started|start the internship|how do i start|onboard)\b', q):
+        return "To join the GPI internship: 1) Register on the IAC portal, 2) Complete the preparation and training modules, 3) Fill out the New Joinee Form with your documents. Your Appointment Letter will be emailed within 5-7 business days. It's that simple!"
 
-    if any(w in q for w in ["evaluate", "grading", "marks", "score", "criteria", "pass", "fail", "assessment"]):
-        return "Your project is evaluated on functionality, code quality, documentation, and demo video. A minimum passing score is required to receive the certificate."
+    if re.search(r'\b(appointment letter|offer letter|joining letter|when will i get|letter status)\b', q):
+        return "Your Appointment Letter is issued within 5-7 business days after you submit the onboarding form and your documents are verified by the HR team. Check your email regularly!"
 
-    if any(w in q for w in ["mumbai", "bkc", "vikhroli", "address", "headquarters", "location of office"]):
-        return "CloudCounselage is based in Mumbai. BKC: 91 Springboard, Kagalwala House, BKC Kalina, Mumbai 400098. Vikhroli: 91 Springboard, Godrej & Boyce Estate, Vikhroli West."
+    if re.search(r'\b(remote|work from home|wfh|online|offline|where do i work|location|from home)\b', q):
+        return "Yes! All GPI internships are 100% remote and work-from-home. You can work from anywhere in the world as long as you meet the weekly milestones and attend check-in meetings."
 
-    if any(w in q for w in ["thank", "thanks", "great", "awesome", "nice", "good", "perfect", "helpful"]):
-        return "You're welcome! Feel free to ask if you have more questions about the internship. Good luck! 🎉"
+    if re.search(r'\b(submit|submission|deliverable|what to submit|project report|demo video|how to submit)\b', q):
+        return "To complete the internship, you need to submit: 1) Your completed project code or files, 2) A detailed project report covering tools, methodology, and outcomes, 3) A short demo video showcasing your project. All through the IAC portal!"
 
-    if any(w in q for w in ["bye", "goodbye", "see you", "take care", "ciao"]):
-        return "Goodbye! Best of luck with your internship. Feel free to come back anytime you have questions!"
+    if re.search(r'\b(miss|late|extension|delay|deadline extension|more time)\b', q):
+        return "If you need more time, contact your project manager in writing and request an extension before the deadline. Late submissions without prior approval may delay your certificate issuance."
 
-    return "That's a great question! For the most accurate answer, please email welcome@cloudcounselage.com or ask in your domain's Telegram/WhatsApp group. You can also rephrase your question and I'll do my best!"
+    if re.search(r'\b(contact|email|reach out|support|helpdesk|help desk|how to contact|get in touch)\b', q):
+        return "You can reach CloudCounselage at:\n📧 General: welcome@cloudcounselage.com\n📧 HR/Certificates: hr@cloudcounselage.com\n💬 Technical: Post in your domain's Telegram or WhatsApp group!"
+
+    if re.search(r'\b(meeting|weekly meeting|check.?in|review session|attendance|webinar|session)\b', q):
+        return "Yes, interns are required to attend weekly virtual check-in meetings. These sessions help review progress, resolve blockers, and ensure you're on track with your milestones."
+
+    if re.search(r'\b(mentor|communicate|whatsapp group|telegram group|community|peer|batch)\b', q):
+        return "All communication happens through official domain-specific WhatsApp and Telegram groups. Your mentor will be available there to guide you, answer questions, and give feedback on your work."
+
+    if re.search(r'\b(fake|fraud|scam|genuine|legit|real|safe|trust|verify|authentic)\b', q):
+        return "CloudCounselage is a legitimate, registered IT company based in Mumbai. All programs are 100% free — they will never ask for payment or bank details. Only trust communications from @cloudcounselage.com email IDs."
+
+    if re.search(r'\b(iac|industry academia|community|about cc|cloudcounselage)\b', q):
+        return "CloudCounselage operates the Industry Academia Community (IAC) — a free platform with 5 lakh+ members across 40+ countries. It connects students, colleges, and industry professionals for internships, mentorship, and job opportunities."
+
+    if re.search(r'\b(evaluate|evaluation|grading|marks|score|how am i judged|criteria|pass|fail|assessment)\b', q):
+        return "Your project is evaluated by industry mentors based on: functionality of your project, code quality, documentation accuracy, and your demo video. A minimum passing score is required to receive the certificate."
+
+    if re.search(r'\b(mumbai|bkc|vikhroli|address|office|headquarters)\b', q):
+        return "CloudCounselage has offices in Mumbai:\n🏢 BKC: 91 Springboard, Kagalwala House, BKC Kalina, Mumbai 400098\n🏢 Vikhroli: 91 Springboard, Godrej & Boyce Estate, Vikhroli West, Mumbai 400079"
+
+    if re.search(r'\b(task|assignment|work|project|what do i do|what should i do|my work)\b', q):
+        return "As a GPI intern, you'll work on a live project assigned to you based on your domain. You attend weekly webinars, complete tasks, document your progress, and submit your final project with a report and demo video."
+
+    if re.search(r'\b(IAC portal|portal|dashboard|platform|website|where to submit)\b', q):
+        return "The IAC portal is the main platform where you register, access training modules, submit your work, and track your internship progress. You'll receive the portal link during onboarding."
+
+    # ── Default ───────────────────────────────────────────────
+    return (
+        "Thanks for your question! 😊 I'm focused on the CloudCounselage GPI internship program. "
+        "For more specific queries, feel free to email welcome@cloudcounselage.com "
+        "or ask your question in your domain's Telegram/WhatsApp group where mentors are active!"
+    )
