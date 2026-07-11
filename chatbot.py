@@ -2,7 +2,8 @@ import difflib
 from database import get_all_faqs, get_or_create_conversation, save_message, get_conversation_history
 from ai_service import get_ai_response
 
-THRESHOLD = 0.45
+# Raised threshold so short greetings never match FAQs
+THRESHOLD = 0.60
 
 def clean(text: str) -> str:
     text = text.lower().strip()
@@ -12,12 +13,14 @@ def clean(text: str) -> str:
 
 def find_faq(query: str, faqs: list):
     cq = clean(query)
+    # Short inputs like "hi", "hello", "how are you" should never match FAQs
+    if len(cq.split()) <= 3 and not any(w in cq for w in ["certificate", "paid", "join", "domain", "duration", "submit", "mentor", "deadline", "contact", "remote"]):
+        return None, 0.0
+
     best, score = None, 0.0
     for faq in faqs:
         cf = clean(faq["question"])
-        # Sequence ratio
         seq = difflib.SequenceMatcher(None, cq, cf).ratio()
-        # Word overlap
         qw, fw = set(cq.split()), set(cf.split())
         overlap = len(qw & fw) / max(len(qw), len(fw)) if qw and fw else 0
         s = max(seq, overlap)
